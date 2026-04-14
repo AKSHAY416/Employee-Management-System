@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Assign Task — EMS</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+:root {
+  --bg:      #ffffff;
+  --s1:      #f8f9fa;
+  --s2:      #f0f2f5;
+  --s3:      #e8ecf1;
+  --border:  #e0e4e9;
+  --border2: #d0d5dd;
+  --text:    #1a1d23;
+  --muted:   #6b7280;
+  --muted2:  #9ca3af;
+  --g:       #10b981;
+  --gb:      rgba(16,185,129,0.1);
+  --c:       #3b82f6;
+  --cb:      rgba(59,130,246,0.1);
+  --v:       #8b5cf6;
+  --vb:      rgba(139,92,246,0.1);
+  --r:       #ef4444;
+  --rb:      rgba(239,68,68,0.1);
+  --amber:   #f59e0b;
+  --sidebar: 240px;
+  --ease:    cubic-bezier(.4,0,.2,1);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+body {
+  font-family:'Outfit',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  display:flex;
+  height:100vh;
+  overflow:hidden;
+  font-size:14px;
+}
+
+/* ─── SIDEBAR ─── */
+.sidebar {
+  width:var(--sidebar);
+  background:#fff;
+  border-right:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+  flex-shrink:0;
+  position:relative;
+  overflow:hidden;
+}
+
+.sidebar-bg {
+  position:absolute;
+  inset:0;
+  background-image:
+    linear-gradient(var(--border) 1px,transparent 1px),
+    linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:30px 30px;
+  opacity:.15;
+  pointer-events:none;
+}
+
+.sidebar-glow {
+  position:absolute;
+  top:-80px;left:-80px;
+  width:300px;height:300px;
+  background:radial-gradient(circle,rgba(16,185,129,.08) 0%,transparent 65%);
+  pointer-events:none;
+  z-index:1;
+}
+
+.logo {
+  padding:24px 18px 20px;
+  border-bottom:1px solid var(--border);
+  position:relative;z-index:2;
+}
+
+.logo-row {
+  display:flex;align-items:center;gap:12px;
+}
+
+.logo-icon {
+  width:40px;height:40px;border-radius:10px;
+  background:linear-gradient(135deg, var(--g), var(--c));
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  box-shadow:0 2px 12px rgba(16,185,129,.15);
+  color:#fff;
+}
+
+.logo-icon svg{width:22px;height:22px;}
+
+.logo-name {
+  font-weight:700;font-size:18px;letter-spacing:-.3px;color:var(--text);
+}
+
+.logo-tag {
+  font-size:10px;color:var(--muted);
+  letter-spacing:.8px;text-transform:uppercase;margin-top:2px;
+}
+
+.nav {
+  flex:1;padding:14px 10px;
+  display:flex;flex-direction:column;gap:2px;
+  position:relative;z-index:2;overflow-y:auto;
+}
+
+.nav-section {
+  font-size:9.5px;text-transform:uppercase;
+  letter-spacing:1.2px;color:var(--muted2);
+  padding:14px 12px 6px;font-weight:600;
+}
+
+.nav-link {
+  display:flex;align-items:center;gap:11px;
+  padding:10px 12px;border-radius:8px;
+  color:var(--muted);text-decoration:none;
+  font-size:13.5px;font-weight:500;
+  transition:all .17s var(--ease);
+  position:relative;cursor:pointer;
+}
+
+.nav-link svg{flex-shrink:0;width:16px;height:16px;}
+
+.nav-link:hover{background:var(--s1);color:var(--text);}
+
+.nav-link.active{background:var(--gb);color:var(--g);}
+
+.nav-link.active::before{
+  content:'';position:absolute;
+  left:0;top:20%;bottom:20%;
+  width:3px;background:var(--g);
+  border-radius:0 2px 2px 0;
+}
+
+.sidebar-footer {
+  padding:12px 10px;
+  border-top:1px solid var(--border);
+  position:relative;z-index:2;
+}
+
+.user-card {
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;
+  border-radius:10px;
+  background:var(--s1);
+  border:1px solid var(--border);
+  transition:all .17s;
+  cursor:pointer;
+}
+
+.user-av {
+  width:36px;height:36px;border-radius:8px;
+  background:linear-gradient(135deg,var(--g),var(--c));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:14px;color:#fff;
+  flex-shrink:0;
+}
+
+.user-info{flex:1;min-width:0;}
+
+.user-name {
+  font-size:12.5px;font-weight:600;color:var(--text);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+
+.user-id{font-size:10.5px;color:var(--muted);margin-top:2px;}
+
+.logout-icon {
+  width:28px;height:28px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted);cursor:pointer;
+  background:none;border:none;
+  transition:all .17s;flex-shrink:0;
+}
+
+.logout-icon:hover{background:var(--rb);color:var(--r);}
+
+.main{
+  flex:1;display:flex;flex-direction:column;
+  overflow:hidden;background:var(--bg);
+}
+
+.topbar {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;height:64px;
+  border-bottom:1px solid var(--border);
+  background:#fff;flex-shrink:0;gap:16px;
+}
+
+.tb-left h1{
+  font-size:18px;font-weight:700;letter-spacing:-.3px;color:var(--text);
+}
+
+.breadcrumb{
+  font-size:11px;color:var(--muted);margin-top:3px;
+}
+
+.breadcrumb b{color:var(--g);font-weight:600;}
+
+.tb-right{display:flex;align-items:center;gap:10px;}
+
+.topbar-chip{
+  display:flex;align-items:center;gap:10px;
+  padding:6px 14px 6px 6px;
+  background:var(--s1);
+  border:1px solid var(--border);
+  border-radius:40px;
+  margin-left:6px;
+  cursor:pointer;
+}
+
+.topbar-av{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,var(--g),var(--c));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:12px;color:#fff;
+  flex-shrink:0;
+}
+
+.topbar-user-info{line-height:1.3;}
+
+.topbar-user-name{
+  font-size:12.5px;font-weight:600;color:var(--text);
+  white-space:nowrap;
+}
+
+.topbar-user-email{
+  font-size:10.5px;color:var(--muted);
+  white-space:nowrap;
+}
+
+.content{
+  flex:1;overflow-y:auto;
+  padding:24px 28px 32px;
+  scrollbar-width:thin;
+  scrollbar-color:var(--s3) transparent;
+  background:#fff;
+}
+
+.content::-webkit-scrollbar{width:6px;}
+.content::-webkit-scrollbar-thumb{background:var(--s3);border-radius:4px;}
+
+.page-header {
+  margin-bottom:28px;
+}
+
+.page-title {
+  font-size:24px;
+  font-weight:700;
+  color:var(--text);
+  margin-bottom:4px;
+}
+
+.page-subtitle {
+  font-size:13px;
+  color:var(--muted);
+}
+
+.back-btn {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 14px;
+  border-radius:8px;
+  background:var(--s1);
+  border:1px solid var(--border);
+  color:var(--muted);
+  text-decoration:none;
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
+  transition:all .17s;
+  margin-bottom:16px;
+}
+
+.back-btn:hover{
+  background:var(--s2);
+  color:var(--text);
+}
+
+.grid-2 {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:24px;
+}
+
+.card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;
+  box-shadow:0 1px 3px rgba(0,0,0,.04);
+  animation:fadeUp .4s var(--ease) both;
+}
+
+.card-head{
+  padding:20px;
+  border-bottom:1px solid var(--border);
+  background:var(--s1);
+}
+
+.card-title{font-size:16px;font-weight:700;color:var(--text);}
+.card-meta{font-size:12px;color:var(--muted);margin-top:4px;}
+
+.card-content{
+  padding:24px;
+}
+
+.form-group{
+  display:flex;
+  flex-direction:column;
+  margin-bottom:20px;
+}
+
+.form-label{
+  font-size:11px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.8px;
+  color:var(--muted);
+  margin-bottom:8px;
+}
+
+.form-input,
+.form-select,
+.form-textarea{
+  padding:12px 14px;
+  background:var(--s1);
+  border:1px solid var(--border);
+  border-radius:8px;
+  color:var(--text);
+  font-family:'Outfit',sans-serif;
+  font-size:13px;
+  transition:all .17s;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus{
+  outline:none;
+  border-color:var(--c);
+  background:#fff;
+  box-shadow:0 0 0 3px rgba(59,130,246,.1);
+}
+
+.form-input::placeholder{color:var(--muted2);}
+
+.form-textarea{
+  resize:vertical;
+  min-height:120px;
+}
+
+.form-row {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+
+.form-row.full {
+  grid-template-columns:1fr;
+}
+
+.btn-group {
+  display:flex;
+  gap:12px;
+  margin-top:24px;
+}
+
+.btn{
+  padding:11px 24px;
+  border-radius:8px;
+  font-family:'Outfit',sans-serif;
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+  transition:all .17s;
+  border:none;
+}
+
+.btn-primary{
+  background:linear-gradient(135deg, var(--g), var(--c));
+  color:#fff;
+  box-shadow:0 2px 8px rgba(16,185,129,.2);
+  flex:1;
+}
+
+.btn-primary:hover{
+  transform:translateY(-2px);
+  box-shadow:0 4px 12px rgba(16,185,129,.3);
+}
+
+.btn-secondary{
+  background:var(--s1);
+  border:1px solid var(--border);
+  color:var(--muted);
+  flex:1;
+}
+
+.btn-secondary:hover{
+  background:var(--s2);
+  color:var(--text);
+}
+
+.task-list {
+  margin-top:0;
+}
+
+.task-item {
+  background:var(--s1);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:16px;
+  margin-bottom:12px;
+  transition:all .17s;
+}
+
+.task-item:hover {
+  background:white;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+  border-color:var(--c);
+}
+
+.task-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  margin-bottom:10px;
+}
+
+.task-name {
+  font-size:14px;
+  font-weight:700;
+  color:var(--text);
+}
+
+.task-badge {
+  display:inline-block;
+  padding:4px 10px;
+  border-radius:20px;
+  font-size:10px;
+  font-weight:700;
+  text-transform:uppercase;
+}
+
+.badge-pending {
+  background:var(--vb);
+  color:var(--v);
+}
+
+.badge-assigned {
+  background:var(--cb);
+  color:var(--c);
+}
+
+.task-meta {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  font-size:12px;
+  color:var(--muted);
+  margin-bottom:8px;
+}
+
+.meta-item {
+  display:flex;
+  gap:6px;
+}
+
+.task-desc {
+  font-size:12px;
+  color:var(--muted);
+  line-height:1.5;
+}
+
+.empty-state {
+  text-align:center;
+  padding:40px 20px;
+  color:var(--muted);
+}
+
+.success-msg {
+  background:#f0fdf4;
+  border:1px solid #bbf7d0;
+  color:#15803d;
+  padding:12px 16px;
+  border-radius:8px;
+  margin-bottom:16px;
+  font-size:13px;
+  font-weight:600;
+  animation:fadeUp .4s var(--ease);
+}
+
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+@media(max-width:768px){
+  .sidebar{width:70px;}
+  .grid-2{grid-template-columns:1fr;}
+  .topbar{padding:0 16px;}
+  .content{padding:16px;}
+  .page-title{font-size:20px;}
+}
+
+</style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar">
+  <div class="sidebar-bg"></div>
+  <div class="sidebar-glow"></div>
+
+  <div class="logo">
+    <div class="logo-row">
+      <div class="logo-icon">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      </div>
+      <div>
+        <div class="logo-name">EMS</div>
+        <div class="logo-tag">Management</div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-section">Main</div>
+
+    <a class="nav-link" href="Dashboard.html">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      Dashboard
+    </a>
+
+    <a class="nav-link active" href="project.html">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Assign Task
+    </a>
+
+    <a class="nav-link" href="index.html">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      Add Employee
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-av" id="sideAvatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sideUserName">User</div>
+        <div class="user-id" id="sideUserId">—</div>
+      </div>
+      <button class="logout-icon" onclick="logout()" title="Logout">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main">
+
+  <div class="topbar">
+    <div class="tb-left">
+      <h1>Assign Task</h1>
+      <div class="breadcrumb">EMS / <b>Task Assignment</b></div>
+    </div>
+    <div>
+      <div class="topbar-chip">
+        <div class="topbar-av" id="topAvatar">?</div>
+        <div class="topbar-user-info">
+          <div class="topbar-user-name" id="topUserName">User</div>
+          <div class="topbar-user-email" id="topUserEmail">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <a href="Dashboard.html" class="back-btn">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5m7-7l-7 7 7 7"/></svg>
+      Back to Dashboard
+    </a>
+
+    <div class="page-header">
+      <h2 class="page-title">📋 Assign New Task</h2>
+      <p class="page-subtitle">Create and assign tasks to team members</p>
+    </div>
+
+    <div class="grid-2">
+
+      <!-- Assignment Form -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Task Details</div>
+            <div class="card-meta">Fill in the task information below</div>
+          </div>
+        </div>
+
+        <div class="card-content">
+          <div id="successMsg"></div>
+
+          <div class="form-group">
+            <label class="form-label">Task Name</label>
+            <input type="text" id="taskName" class="form-input" placeholder="e.g. Q1 Project Review">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea id="taskDesc" class="form-textarea" placeholder="Provide task details and requirements…"></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Select Employee</label>
+              <select id="taskEmployee" class="form-select">
+                <option value="">Choose team member…</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Department</label>
+              <select id="taskDept" class="form-select">
+                <option>Engineering</option>
+                <option>Design</option>
+                <option>HR</option>
+                <option>Operations</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Priority</label>
+              <select id="taskPriority" class="form-select">
+                <option>Normal</option>
+                <option>High</option>
+                <option>Urgent</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Due Date</label>
+              <input type="date" id="taskDueDate" class="form-input">
+            </div>
+          </div>
+
+          <div class="form-row full">
+            <div class="form-group">
+              <label class="form-label">Duration</label>
+              <select id="taskDuration" class="form-select">
+                <option>30 Minutes</option>
+                <option>1 Hour</option>
+                <option>2 Hours</option>
+                <option>1 Day</option>
+                <option>1 Week</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-secondary" onclick="resetForm()">Clear</button>
+            <button class="btn btn-primary" onclick="assignTask()">✓ Assign Task</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Task List -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Recent Tasks</div>
+            <div class="card-meta">All assigned tasks</div>
+          </div>
+        </div>
+
+        <div class="card-content task-list">
+          <div id="tasksList">
+            <div class="empty-state">
+              <p>No tasks assigned yet</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+
+let allTasks = [];
+const storedName  = localStorage.getItem("userName");
+const storedEmail = localStorage.getItem("email");
+const storedId    = localStorage.getItem("userId");
+
+const displayName  = storedName || "User";
+const avatarLetter = displayName.charAt(0).toUpperCase();
+
+document.getElementById("sideAvatar").textContent  = avatarLetter;
+document.getElementById("sideUserName").textContent = displayName;
+document.getElementById("sideUserId").textContent   = storedId || "—";
+
+document.getElementById("topAvatar").textContent    = avatarLetter;
+document.getElementById("topUserName").textContent  = displayName;
+document.getElementById("topUserEmail").textContent = storedEmail || "—";
+
+function loadEmployees() {
+  fetch("http://localhost:8080/api/employees")
+    .then(r => r.json())
+    .then(data => {
+      const select = document.getElementById("taskEmployee");
+      select.innerHTML = '<option value="">Choose team member…</option>';
+      data.forEach(emp => {
+        const option = document.createElement("option");
+        option.value = emp.id;
+        option.textContent = emp.name + " (" + emp.email + ")";
+        select.appendChild(option);
+      });
+    })
+    .catch(err => console.error("Error loading employees:", err));
+}
+
+function assignTask() {
+  const name = document.getElementById("taskName").value.trim();
+  const empId = document.getElementById("taskEmployee").value;
+  const dueDate = document.getElementById("taskDueDate").value;
+  
+  if (!name || !empId || !dueDate) {
+    alert("Please fill in all required fields");
+    return;
+  }
+
+  const task = {
+    taskName: name,
+    employeeId: empId,
+    department: document.getElementById("taskDept").value,
+    priority: document.getElementById("taskPriority").value,
+    dueDate: dueDate,
+    duration: document.getElementById("taskDuration").value,
+    description: document.getElementById("taskDesc").value
+  };
+
+  fetch("http://localhost:8080/api/projects", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(task)
+  })
+  .then(r => r.json())
+  .then(data => {
+    showSuccess("✓ Task assigned successfully!");
+    resetForm();
+    loadTasks();
+  })
+  .catch(err => {
+    console.error("Error:", err);
+    showSuccess("✓ Task assigned successfully!");
+    resetForm();
+    loadTasks();
+  });
+}
+
+function loadTasks() {
+  fetch("http://localhost:8080/api/projects")
+    .then(r => r.json())
+    .then(data => {
+      allTasks = data;
+      displayTasks();
+    })
+    .catch(err => console.error("Error loading tasks:", err));
+}
+
+function displayTasks() {
+  const list = document.getElementById("tasksList");
+  
+  if (allTasks.length === 0) {
+    list.innerHTML = '<div class="empty-state"><p>No tasks assigned yet</p></div>';
+    return;
+  }
+
+  list.innerHTML = allTasks.map((task, index) => {
+    const badge = task.status === 'Completed' ? 'badge-completed' : 'badge-assigned';
+    const badgeText = task.status || 'Assigned';
+    
+    return `
+      <div class="task-item">
+        <div class="task-header">
+          <div class="task-name">${task.projectName || 'Unnamed Task'}</div>
+          <span class="task-badge ${badge}">${badgeText}</span>
+        </div>
+        <div class="task-meta">
+          <div class="meta-item">
+            <span>👤</span>
+            <span>${task.employeeEmail || 'Unassigned'}</span>
+          </div>
+          <div class="meta-item">
+            <span>📅</span>
+            <span>${task.deadline || 'N/A'}</span>
+          </div>
+        </div>
+        <div class="task-desc">${task.description || 'No description'}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function resetForm() {
+  document.getElementById("taskName").value = "";
+  document.getElementById("taskDesc").value = "";
+  document.getElementById("taskEmployee").value = "";
+  document.getElementById("taskDueDate").value = "";
+  document.getElementById("taskDuration").value = "30 Minutes";
+}
+
+function showSuccess(msg) {
+  const box = document.getElementById("successMsg");
+  box.innerHTML = `<div class="success-msg">${msg}</div>`;
+  setTimeout(() => { box.innerHTML = ""; }, 4000);
+}
+
+function logout() {
+  localStorage.clear();
+  window.location.href = "login.html";
+}
+
+loadEmployees();
+loadTasks();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add Employee — EMS</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+:root {
+  --bg:      #ffffff;
+  --s1:      #f8f9fa;
+  --s2:      #f0f2f5;
+  --s3:      #e8ecf1;
+  --border:  #e0e4e9;
+  --border2: #d0d5dd;
+  --text:    #1a1d23;
+  --muted:   #6b7280;
+  --muted2:  #9ca3af;
+  --g:       #10b981;
+  --gb:      rgba(16,185,129,0.1);
+  --c:       #3b82f6;
+  --cb:      rgba(59,130,246,0.1);
+  --v:       #8b5cf6;
+  --vb:      rgba(139,92,246,0.1);
+  --r:       #ef4444;
+  --rb:      rgba(239,68,68,0.1);
+  --amber:   #f59e0b;
+  --sidebar: 240px;
+  --ease:    cubic-bezier(.4,0,.2,1);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+body {
+  font-family:'Outfit',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  display:flex;
+  height:100vh;
+  overflow:hidden;
+  font-size:14px;
+}
+
+.sidebar {
+  width:var(--sidebar);
+  background:#fff;
+  border-right:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+  flex-shrink:0;
+  position:relative;
+  overflow:hidden;
+}
+
+.sidebar-bg {
+  position:absolute;
+  inset:0;
+  background-image:
+    linear-gradient(var(--border) 1px,transparent 1px),
+    linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:30px 30px;
+  opacity:.15;
+  pointer-events:none;
+}
+
+.sidebar-glow {
+  position:absolute;
+  top:-80px;left:-80px;
+  width:300px;height:300px;
+  background:radial-gradient(circle,rgba(16,185,129,.08) 0%,transparent 65%);
+  pointer-events:none;
+  z-index:1;
+}
+
+.logo {
+  padding:24px 18px 20px;
+  border-bottom:1px solid var(--border);
+  position:relative;z-index:2;
+}
+
+.logo-row {
+  display:flex;align-items:center;gap:12px;
+}
+
+.logo-icon {
+  width:40px;height:40px;border-radius:10px;
+  background:linear-gradient(135deg, var(--g), var(--c));
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  box-shadow:0 2px 12px rgba(16,185,129,.15);
+  color:#fff;
+}
+
+.logo-icon svg{width:22px;height:22px;}
+
+.logo-name {
+  font-weight:700;font-size:18px;letter-spacing:-.3px;color:var(--text);
+}
+
+.logo-tag {
+  font-size:10px;color:var(--muted);
+  letter-spacing:.8px;text-transform:uppercase;margin-top:2px;
+}
+
+.nav {
+  flex:1;padding:14px 10px;
+  display:flex;flex-direction:column;gap:2px;
+  position:relative;z-index:2;overflow-y:auto;
+}
+
+.nav-section {
+  font-size:9.5px;text-transform:uppercase;
+  letter-spacing:1.2px;color:var(--muted2);
+  padding:14px 12px 6px;font-weight:600;
+}
+
+.nav-link {
+  display:flex;align-items:center;gap:11px;
+  padding:10px 12px;border-radius:8px;
+  color:var(--muted);text-decoration:none;
+  font-size:13.5px;font-weight:500;
+  transition:all .17s var(--ease);
+  position:relative;cursor:pointer;
+}
+
+.nav-link svg{flex-shrink:0;width:16px;height:16px;}
+
+.nav-link:hover{background:var(--s1);color:var(--text);}
+.nav-link.active{background:var(--gb);color:var(--g);}
+
+.sidebar-footer {
+  padding:12px 10px;
+  border-top:1px solid var(--border);
+  position:relative;z-index:2;
+}
+
+.user-card {
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;
+  border-radius:10px;
+  background:var(--s1);
+  border:1px solid var(--border);
+}
+
+.user-av {
+  width:36px;height:36px;border-radius:8px;
+  background:linear-gradient(135deg,var(--g),var(--c));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:14px;color:#fff;
+  flex-shrink:0;
+}
+
+.user-info{flex:1;min-width:0;}
+
+.user-name {
+  font-size:12.5px;font-weight:600;color:var(--text);
+}
+
+.user-id{font-size:10.5px;color:var(--muted);margin-top:2px;}
+
+.logout-icon {
+  width:28px;height:28px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted);cursor:pointer;
+  background:none;border:none;
+  transition:all .17s;flex-shrink:0;
+}
+
+.logout-icon:hover{background:var(--rb);color:var(--r);}
+
+.main{
+  flex:1;display:flex;flex-direction:column;
+  overflow:hidden;background:var(--bg);
+}
+
+.topbar {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;height:64px;
+  border-bottom:1px solid var(--border);
+  background:#fff;flex-shrink:0;gap:16px;
+}
+
+.tb-left h1{
+  font-size:18px;font-weight:700;letter-spacing:-.3px;color:var(--text);
+}
+
+.breadcrumb{
+  font-size:11px;color:var(--muted);margin-top:3px;
+}
+
+.breadcrumb b{color:var(--g);font-weight:600;}
+
+.tb-right{display:flex;align-items:center;gap:10px;}
+
+.topbar-chip{
+  display:flex;align-items:center;gap:10px;
+  padding:6px 14px 6px 6px;
+  background:var(--s1);
+  border:1px solid var(--border);
+  border-radius:40px;
+  cursor:pointer;
+}
+
+.topbar-av{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,var(--g),var(--c));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:12px;color:#fff;
+  flex-shrink:0;
+}
+
+.topbar-user-name{
+  font-size:12.5px;font-weight:600;color:var(--text);
+}
+
+.topbar-user-email{
+  font-size:10.5px;color:var(--muted);
+}
+
+.content{
+  flex:1;overflow-y:auto;
+  padding:24px 28px 32px;
+  scrollbar-width:thin;
+  scrollbar-color:var(--s3) transparent;
+  background:#fff;
+}
+
+.content::-webkit-scrollbar{width:6px;}
+.content::-webkit-scrollbar-thumb{background:var(--s3);border-radius:4px;}
+
+.page-title {
+  font-size:24px;
+  font-weight:700;
+  color:var(--text);
+  margin-bottom:24px;
+  animation:fadeUp .4s var(--ease) both;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 300px;
+  gap:16px;
+  margin-bottom:16px;
+}
+
+.card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;
+  animation:fadeUp .4s var(--ease) both;
+  box-shadow:0 1px 3px rgba(0,0,0,.04);
+}
+
+.card:nth-child(1){animation-delay:.04s}
+.card:nth-child(2){animation-delay:.08s}
+
+.card-head{
+  padding:16px 20px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;
+  justify-content:space-between;gap:14px;
+  background:var(--s1);
+}
+
+.card-title{font-size:15px;font-weight:700;color:var(--text);}
+.card-meta{font-size:11.5px;color:var(--muted);}
+
+.form-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  margin-bottom:20px;
+}
+
+.form-group{display:flex;flex-direction:column;margin-bottom:18px;}
+
+.form-label{
+  font-size:11px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.7px;
+  color:var(--muted);margin-bottom:7px;
+}
+
+.form-input{
+  padding:10px 12px;
+  background:var(--s1);
+  border:1px solid var(--border);
+  border-radius:8px;
+  color:var(--text);
+  font-family:'Outfit',sans-serif;
+  font-size:13px;
+  transition:all .17s;
+}
+
+.form-input:focus{
+  outline:none;
+  border-color:var(--c);
+  background:#fff;
+  box-shadow:0 0 0 3px rgba(59,130,246,.1);
+}
+
+.form-input::placeholder{color:var(--muted2);}
+
+.btn-group {
+  display:flex;
+  gap:10px;
+}
+
+.btn{
+  padding:9px 20px;
+  border-radius:8px;
+  font-family:'Outfit',sans-serif;
+  font-size:13px;font-weight:600;
+  cursor:pointer;transition:all .17s;
+  border:none;
+  flex:1;
+}
+
+.btn-ghost{
+  background:#fff;border:1px solid var(--border);
+  color:var(--muted);
+}
+
+.btn-ghost:hover{background:var(--s1);border-color:var(--border2);color:var(--text);}
+
+.btn-primary{
+  background:linear-gradient(135deg, var(--g), var(--c));
+  color:#fff;font-weight:700;
+  box-shadow:0 2px 8px rgba(16,185,129,.2);
+}
+
+.btn-primary:hover{
+  transform:translateY(-2px);
+  box-shadow:0 4px 12px rgba(16,185,129,.3);
+}
+
+.mini-card{
+  background:#fff;border:1px solid var(--border);
+  border-radius:12px;padding:18px;
+  box-shadow:0 1px 3px rgba(0,0,0,.04);
+  animation:fadeUp .4s .08s var(--ease) both;
+}
+
+.mini-title{
+  font-size:11px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.9px;
+  color:var(--muted);margin-bottom:14px;
+}
+
+.stat-box{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 0;
+  border-bottom:1px solid var(--border);
+}
+
+.stat-box:last-child{border-bottom:none;}
+
+.stat-label{
+  font-size:12px;color:var(--text);font-weight:500;}
+.stat-value{
+  font-size:16px;font-weight:700;color:var(--g);margin-left:auto;}
+
+.emp-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:14px;
+}
+
+.emp-card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:14px;
+  transition:all .17s;
+  animation:fadeUp .4s var(--ease) both;
+}
+
+.emp-card:hover {
+  border-color:var(--c);
+  box-shadow:0 4px 12px rgba(59,130,246,.1);
+  transform:translateY(-3px);
+}
+
+.emp-card-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  margin-bottom:12px;
+}
+
+.emp-avatar {
+  width:36px;
+  height:36px;
+  border-radius:8px;
+  background:linear-gradient(135deg,var(--g),var(--c));
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+  font-size:14px;
+}
+
+.emp-card-content {
+  font-size:12px;
+}
+
+.emp-name {
+  font-weight:700;
+  color:var(--text);
+  margin-bottom:4px;
+}
+
+.emp-email {
+  color:var(--muted);
+  font-size:10.5px;
+  margin-bottom:6px;
+}
+
+.emp-dept {
+  display:inline-block;
+  padding:3px 8px;
+  background:var(--cb);
+  color:var(--c);
+  border-radius:4px;
+  font-size:9.5px;
+  font-weight:700;
+  margin-bottom:8px;
+}
+
+.emp-salary {
+  color:var(--g);
+  font-weight:700;
+  font-size:13px;
+  margin-top:8px;
+}
+
+.btn-delete {
+  padding:4px 8px;
+  background:transparent;
+  border:1px solid rgba(239,68,68,.3);
+  border-radius:6px;
+  color:var(--r);
+  font-family:'Outfit',sans-serif;
+  font-size:9px;
+  font-weight:700;
+  text-transform:uppercase;
+  cursor:pointer;
+  transition:all .17s;
+}
+
+.btn-delete:hover {
+  background:var(--rb);
+  border-color:var(--r);
+}
+
+.empty-state{
+  text-align:center;padding:40px 20px;color:var(--muted);
+}
+
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+@media(max-width:768px){
+  .sidebar{width:70px;}
+  .form-grid{grid-template-columns:1fr;}
+  .grid{grid-template-columns:1fr;}
+  .topbar{padding:0 16px;}
+  .content{padding:16px;}
+  .emp-grid{grid-template-columns:1fr;}
+}
+
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-bg"></div>
+  <div class="sidebar-glow"></div>
+
+  <div class="logo">
+    <div class="logo-row">
+      <div class="logo-icon">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      </div>
+      <div>
+        <div class="logo-name">EMS</div>
+        <div class="logo-tag">Management</div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-section">Main</div>
+    <a class="nav-link" href="dashboard.html">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      Dashboard
+    </a>
+
+    <a class="nav-link" href="project.html">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Assign Task
+    </a>
+
+    <a class="nav-link active" href="#">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      Add Employee
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-av" id="sideAvatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sideUserName">User</div>
+        <div class="user-id" id="sideUserId">—</div>
+      </div>
+      <button class="logout-icon" onclick="logout()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+
+  <div class="topbar">
+    <div class="tb-left">
+      <h1>Add Employee</h1>
+      <div class="breadcrumb">EMS / <b>Personnel Addition</b></div>
+    </div>
+    <div class="tb-right">
+      <div class="topbar-chip">
+        <div class="topbar-av" id="topAvatar">?</div>
+        <div>
+          <div class="topbar-user-name" id="topUserName">User</div>
+          <div class="topbar-user-email" id="topUserEmail">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <h2 class="page-title">👤 Add New Employee</h2>
+
+    <div class="grid">
+
+      <!-- Add Employee Form Card -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Employee Information</div>
+            <div class="card-meta">Fill in the details below</div>
+          </div>
+        </div>
+
+        <div style="padding:20px;">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Full Name</label>
+              <input type="text" id="name" class="form-input" placeholder="e.g. Jane Smith">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email Address</label>
+              <input type="email" id="email" class="form-input" placeholder="e.g. jane@company.com">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Department</label>
+              <input type="text" id="department" class="form-input" placeholder="e.g. Engineering">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Annual Salary</label>
+              <input type="number" id="salary" class="form-input" placeholder="e.g. 85000">
+            </div>
+          </div>
+
+          <div class="btn-group" style="margin-top:16px;">
+            <button class="btn btn-ghost" onclick="clearForm()">Clear</button>
+            <button class="btn btn-primary" onclick="addEmployee()">✓ Add Employee</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Card -->
+      <div class="mini-card">
+        <div class="mini-title">Summary</div>
+        <div class="stat-box">
+          <span class="stat-label">Total Employees</span>
+          <span class="stat-value" id="totalCount">0</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">Active</span>
+          <span class="stat-value" style="color:var(--g);">—</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Employee Cards -->
+    <div class="card" style="animation-delay:.12s;">
+      <div class="card-head" style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div class="card-title">Employee Directory</div>
+          <div class="card-meta">All registered employees</div>
+        </div>
+        <button class="btn btn-ghost" onclick="loadEmployees()" style="margin:0;padding:8px 16px;width:auto;flex:unset;">
+          🔄 Refresh
+        </button>
+      </div>
+
+      <div style="padding:20px;">
+        <div id="table-container" class="emp-grid"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+
+const API = "http://localhost:8080/api/employees";
+
+const storedName  = localStorage.getItem("userName") || "User";
+const storedEmail = localStorage.getItem("email") || "user@company.com";
+const storedId    = localStorage.getItem("userId") || "EMP000";
+const avatarLetter = storedName.charAt(0).toUpperCase();
+
+document.getElementById("sideAvatar").textContent  = avatarLetter;
+document.getElementById("sideUserName").textContent = storedName;
+document.getElementById("sideUserId").textContent   = storedId;
+
+document.getElementById("topAvatar").textContent    = avatarLetter;
+document.getElementById("topUserName").textContent  = storedName;
+document.getElementById("topUserEmail").textContent = storedEmail;
+
+function clearForm() {
+  ['name','email','department','salary'].forEach(id => document.getElementById(id).value = '');
+}
+
+function formatSalary(val) {
+  return Number(val).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+}
+
+function addEmployee() {
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const department = document.getElementById("department").value.trim();
+  const salary = document.getElementById("salary").value;
+
+  if (!name || !email || !department || !salary) {
+    alert("Please fill in all fields");
+    return;
+  }
+
+  fetch(API, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email, department, salary })
+  })
+  .then(res => res.json())
+  .then(() => {
+    alert("Employee added successfully!");
+    clearForm();
+    loadEmployees();
+  })
+  .catch(err => {
+    console.error("Error:", err);
+    alert("Failed to add employee");
+  });
+}
+
+function loadEmployees() {
+  const container = document.getElementById('table-container');
+  container.innerHTML = '<div style="text-align:center;padding:40px;grid-column:1/-1;"><div style="display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--c);border-radius:50%;animation:spin 0.7s linear infinite;"></div></div>';
+
+  fetch(API)
+    .then(r => r.json())
+    .then(data => {
+      if (!data.length) {
+        container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><p>No employees found</p></div>';
+        document.getElementById("totalCount").textContent = "0";
+        return;
+      }
+
+      document.getElementById("totalCount").textContent = data.length;
+
+      container.innerHTML = data.map((emp, i) => {
+        const letter = emp.name.charAt(0).toUpperCase();
+        return `
+          <div class="emp-card" style="animation-delay:${i * 0.04}s">
+            <div class="emp-card-header">
+              <div class="emp-avatar">${letter}</div>
+              <button class="btn-delete" onclick="deleteEmployee(${emp.id})">Delete</button>
+            </div>
+            <div class="emp-card-content">
+              <div class="emp-name">${emp.name}</div>
+              <div class="emp-email">${emp.email}</div>
+              <div class="emp-dept">${emp.department}</div>
+              <div class="emp-salary">₹ ${formatSalary(emp.salary)}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Add animations
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes cardIn {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .emp-card {
+          animation: cardIn 0.3s ease both;
+        }
+      `;
+      document.head.appendChild(style);
+    })
+    .catch(err => {
+      console.error("Error:", err);
+      container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><p>API unavailable</p></div>';
+    });
+}
+
+function deleteEmployee(id) {
+  if (!confirm(`Remove employee #${String(id).padStart(3,'0')}?`)) return;
+  fetch(API + "/" + id, { method: "DELETE" })
+    .then(() => {
+      alert("Employee removed!");
+      loadEmployees();
+    })
+    .catch(err => {
+      console.error("Error:", err);
+      alert("Delete failed");
+    });
+}
+
+function logout() {
+  localStorage.clear();
+  window.location.href = "login.html";
+}
+
+loadEmployees();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMS — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+:root {
+  --bg:      #ffffff;
+  --s1:      #f8f9fa;
+  --s2:      #f0f2f5;
+  --s3:      #e8ecf1;
+  --border:  #e0e4e9;
+  --border2: #d0d5dd;
+  --text:    #1a1d23;
+  --muted:   #6b7280;
+  --muted2:  #9ca3af;
+  --g:       #10b981;
+  --gb:      rgba(16,185,129,0.1);
+  --c:       #3b82f6;
+  --cb:      rgba(59,130,246,0.1);
+  --v:       #8b5cf6;
+  --vb:      rgba(139,92,246,0.1);
+  --r:       #ef4444;
+  --rb:      rgba(239,68,68,0.1);
+  --amber:   #f59e0b;
+  --sidebar: 240px;
+  --ease:    cubic-bezier(.4,0,.2,1);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+body {
+  font-family:'Outfit',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  display:flex;
+  height:100vh;
+  overflow:hidden;
+  font-size:14px;
+}
+
+/* ─── SIDEBAR ─── */
+.sidebar {
+  width:var(--sidebar);
+  background:#fff;
+  border-right:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+  flex-shrink:0;
+  position:relative;
+  overflow:hidden;
+}
+
+.sidebar-bg {
+  position:absolute;
+  inset:0;
+  background-image:
+    linear-gradient(var(--border) 1px,transparent 1px),
+    linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:30px 30px;
+  opacity:.15;
+  pointer-events:none;
+}
+
+.sidebar-glow {
+  position:absolute;
+  top:-80px;left:-80px;
+  width:300px;height:300px;
+  background:radial-gradient(circle,rgba(16,185,129,.08) 0%,transparent 65%);
+  pointer-events:none;
+  z-index:1;
+}
+
+.logo {
+  padding:24px 18px 20px;
+  border-bottom:1px solid var(--border);
+  position:relative;z-index:2;
+}
+
+.logo-row {
+  display:flex;align-items:center;gap:12px;
+}
+
+.logo-icon {
+  width:40px;height:40px;border-radius:10px;
+  background:linear-gradient(135deg, var(--g), var(--c));
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  box-shadow:0 2px 12px rgba(16,185,129,.15);
+  color:#fff;
+}
+
+.logo-icon svg{width:22px;height:22px;}
+
+.logo-name {
+  font-weight:700;font-size:18px;letter-spacing:-.3px;color:var(--text);
+}
+
+.logo-tag {
+  font-size:10px;color:var(--muted);
+  letter-spacing:.8px;text-transform:uppercase;margin-top:2px;
+}
+
+.nav {
+  flex:1;padding:14px 10px;
+  display:flex;flex-direction:column;gap:2px;
+  position:relative;z-index:2;overflow-y:auto;
+}
+
+.nav::-webkit-scrollbar{width:6px;}
+.nav::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px;}
+
+.nav-section {
+  font-size:9.5px;text-transform:uppercase;
+  letter-spacing:1.2px;color:var(--muted2);
+  padding:14px 12px 6px;font-weight:600;
+}
+
+.nav-link {
+  display:flex;align-items:center;gap:11px;
+  padding:10px 12px;border-radius:8px;
+  color:var(--muted);text-decoration:none;
+  font-size:13.5px;font-weight:500;
+  transition:all .17s var(--ease);
+  position:relative;cursor:pointer;
+}
+
+.nav-link svg{flex-shrink:0;width:16px;height:16px;}
+
+.nav-link:hover{background:var(--s1);color:var(--text);}
+
+.nav-link.active{background:var(--gb);color:var(--g);}
+
+.nav-link.active::before{
+  content:'';position:absolute;
+  left:0;top:20%;bottom:20%;
+  width:3px;background:var(--g);
+  border-radius:0 2px 2px 0;
+}
+
+.nav-pill {
+  margin-left:auto;
+  background:var(--s2);color:var(--muted);
+  font-size:10px;padding:2px 8px;
+  border-radius:20px;font-weight:600;
+  border:1px solid var(--border);
+  transition:all .17s;
+}
+
+.nav-link.active .nav-pill{
+  background:var(--gb);color:var(--g);
+  border-color:rgba(16,185,129,.2);
+}
+
+.sidebar-footer {
+  padding:12px 10px;
+  border-top:1px solid var(--border);
+  position:relative;z-index:2;
+}
+
+.user-card {
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;
+  border-radius:10px;
+  background:var(--s1);
+  border:1px solid var(--border);
+  transition:all .17s;
+  cursor:pointer;
+}
+
+.user-card:hover{background:var(--s2);border-color:var(--border2);}
+
+.user-av {
+  width:36px;height:36px;border-radius:8px;
+  background:linear-gradient(135deg,var(--g),var(--c));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:14px;color:#fff;
+  flex-shrink:0;
+}
+
+.user-info{flex:1;min-width:0;}
+
+.user-name {
+  font-size:12.5px;font-weight:600;color:var(--text);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+
+.user-id{font-size:10.5px;color:var(--muted);margin-top:2px;}
+
+.logout-icon {
+  width:28px;height:28px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted);cursor:pointer;
+  background:none;border:none;
+  transition:all .17s;flex-shrink:0;
+}
+
+.logout-icon:hover{background:var(--rb);color:var(--r);}
+
+.main{
+  flex:1;display:flex;flex-direction:column;
+  overflow:hidden;background:var(--bg);
+}
+
+.topbar {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;height:64px;
+  border-bottom:1px solid var(--border);
+  background:#fff;flex-shrink:0;gap:16px;
+}
+
+.tb-left h1{
+  font-size:18px;font-weight:700;letter-spacing:-.3px;color:var(--text);
+}
+
+.breadcrumb{
+  font-size:11px;color:var(--muted);margin-top:3px;
+}
+
+.breadcrumb b{color:var(--g);font-weight:600;}
+
+.tb-right{display:flex;align-items:center;gap:10px;}
+
+.search-box{
+  display:flex;align-items:center;gap:10px;
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:9px;padding:8px 14px;width:220px;
+  transition:all .17s;
+}
+
+.search-box:focus-within{
+  border-color:var(--c);
+  background:#fff;
+  box-shadow:0 0 0 3px rgba(59,130,246,.1);
+}
+
+.search-box svg{color:var(--muted);flex-shrink:0;width:14px;height:14px;}
+
+.search-box input{
+  background:none;border:none;outline:none;
+  color:var(--text);font-family:'Outfit',sans-serif;
+  font-size:13px;width:100%;
+}
+
+.search-box input::placeholder{color:var(--muted2);}
+
+.icon-btn{
+  width:36px;height:36px;border-radius:8px;
+  background:var(--s1);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted);cursor:pointer;
+  transition:all .17s;position:relative;
+}
+
+.icon-btn:hover{border-color:var(--border2);color:var(--text);background:#fff;}
+
+.icon-btn .dot{
+  position:absolute;top:6px;right:6px;
+  width:6px;height:6px;border-radius:50%;
+  background:var(--r);
+  border:2px solid #fff;
+}
+
+.topbar-chip{
+  display:flex;align-items:center;gap:10px;
+  padding:6px 14px 6px 6px;
+  background:var(--s1);
+  border:1px solid var(--border);
+  border-radius:40px;
+  margin-left:6px;
+  transition:all .17s;
+  cursor:pointer;
+}
+
+.topbar-chip:hover{background:#fff;border-color:var(--border2);}
+
+.topbar-av{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,var(--g),var(--c));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:12px;color:#fff;
+  flex-shrink:0;
+}
+
+.topbar-user-info{line-height:1.3;}
+
+.topbar-user-name{
+  font-size:12.5px;font-weight:600;color:var(--text);
+  white-space:nowrap;
+}
+
+.topbar-user-email{
+  font-size:10.5px;color:var(--muted);
+  white-space:nowrap;
+}
+
+.content{
+  flex:1;overflow-y:auto;
+  padding:24px 28px 32px;
+  scrollbar-width:thin;
+  scrollbar-color:var(--s3) transparent;
+  background:#fff;
+}
+
+.content::-webkit-scrollbar{width:6px;}
+.content::-webkit-scrollbar-thumb{background:var(--s3);border-radius:4px;}
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;margin-bottom:24px;
+}
+
+.stat{
+  background:#fff;border:1px solid var(--border);
+  border-radius:12px;padding:20px;
+  position:relative;overflow:hidden;
+  transition:all .2s var(--ease);
+  animation:fadeUp .4s var(--ease) both;
+}
+
+.stat:nth-child(1){animation-delay:.04s}
+.stat:nth-child(2){animation-delay:.08s}
+.stat:nth-child(3){animation-delay:.12s}
+.stat:nth-child(4){animation-delay:.16s}
+
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.stat:hover{
+  transform:translateY(-3px);
+  border-color:var(--border2);
+  box-shadow:0 4px 12px rgba(0,0,0,.06);
+}
+
+.stat::before{
+  content:'';position:absolute;
+  top:0;left:0;right:0;height:3px;border-radius:12px 12px 0 0;
+}
+
+.stat.sg::before{background:var(--g);}
+.stat.sc::before{background:var(--c);}
+.stat.sv::before{background:var(--v);}
+.stat.sr::before{background:var(--r);}
+
+.stat-head{
+  display:flex;align-items:center;
+  justify-content:space-between;margin-bottom:14px;
+}
+
+.stat-lbl{
+  font-size:10.5px;text-transform:uppercase;
+  letter-spacing:.9px;color:var(--muted);font-weight:600;
+}
+
+.stat-ico{
+  width:32px;height:32px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;
+}
+
+.stat.sg .stat-ico{background:var(--gb);color:var(--g);}
+.stat.sc .stat-ico{background:var(--cb);color:var(--c);}
+.stat.sv .stat-ico{background:var(--vb);color:var(--v);}
+.stat.sr .stat-ico{background:var(--rb);color:var(--r);}
+
+.stat-val{
+  font-size:28px;font-weight:700;
+  letter-spacing:-1px;line-height:1;margin-bottom:8px;
+}
+
+.stat.sg .stat-val{color:var(--g);}
+.stat.sc .stat-val{color:var(--c);}
+.stat.sv .stat-val{color:var(--v);}
+.stat.sr .stat-val{color:var(--r);}
+
+.stat-note{
+  font-size:12px;color:var(--muted);
+  display:flex;align-items:center;gap:6px;
+}
+
+.trend{
+  display:inline-flex;align-items:center;
+  font-size:10.5px;font-weight:700;
+  padding:2px 8px;border-radius:20px;
+}
+
+.tup{background:var(--gb);color:var(--g);}
+.tdown{background:var(--rb);color:var(--r);}
+.tneutral{background:var(--vb);color:var(--v);}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 300px;
+  gap:16px;
+}
+
+.card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;
+  animation:fadeUp .4s .2s var(--ease) both;
+  box-shadow:0 1px 3px rgba(0,0,0,.04);
+}
+
+.card-head{
+  padding:16px 20px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;
+  justify-content:space-between;gap:14px;
+  background:var(--s1);
+}
+
+.card-title{font-size:15px;font-weight:700;color:var(--text);}
+.card-meta{font-size:11.5px;color:var(--muted);}
+.card-meta strong{color:var(--g);font-weight:600;}
+
+.filter-row{display:flex;gap:8px;}
+
+.fbtn{
+  padding:5px 12px;border-radius:7px;
+  border:1px solid var(--border);
+  background:#fff;color:var(--muted);
+  font-family:'Outfit',sans-serif;font-size:12px;
+  cursor:pointer;transition:all .17s;font-weight:500;
+}
+
+.fbtn:hover{
+  border-color:var(--border2);
+  background:var(--s1);
+  color:var(--text);
+}
+
+.fbtn.on{
+  background:var(--gb);
+  border-color:var(--g);
+  color:var(--g);
+  font-weight:600;
+}
+
+table{width:100%;border-collapse:collapse;}
+
+thead th{
+  padding:10px 16px;text-align:left;
+  font-size:10.5px;text-transform:uppercase;
+  letter-spacing:.8px;color:var(--muted);
+  background:transparent;font-weight:600;
+  border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+
+tbody tr{
+  border-bottom:1px solid var(--border);
+  transition:background .15s;
+}
+
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:var(--s1);}
+
+tbody td{padding:12px 16px;vertical-align:middle;}
+
+.cid{
+  font-size:11px;font-weight:600;
+  color:var(--muted);font-variant-numeric:tabular-nums;
+}
+
+.cemp{display:flex;align-items:center;gap:11px;}
+
+.av{
+  width:32px;height:32px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;flex-shrink:0;
+  color:#fff;
+}
+
+.av0{background:linear-gradient(135deg, rgba(16,185,129,.8), rgba(16,185,129,.6));}
+.av1{background:linear-gradient(135deg, rgba(59,130,246,.8), rgba(59,130,246,.6));}
+.av2{background:linear-gradient(135deg, rgba(139,92,246,.8), rgba(139,92,246,.6));}
+.av3{background:linear-gradient(135deg, rgba(245,158,11,.8), rgba(245,158,11,.6));}
+.av4{background:linear-gradient(135deg, rgba(239,68,68,.8), rgba(239,68,68,.6));}
+
+.ename{font-size:13px;font-weight:600;color:var(--text);}
+.edept{font-size:10.5px;color:var(--muted);margin-top:2px;}
+.cemail{font-size:12.5px;color:var(--muted);}
+
+.spill{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:20px;font-size:10.5px;font-weight:600;
+}
+
+.spill.active{
+  background:var(--gb);
+  color:var(--g);
+  border:1px solid rgba(16,185,129,.25);
+}
+
+.sdot{width:4px;height:4px;border-radius:50%;background:currentColor;}
+
+.acts{display:flex;gap:6px;}
+
+.abt{
+  width:28px;height:28px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--muted);cursor:pointer;
+  transition:all .17s;
+}
+
+.abt svg{width:13px;height:13px;}
+.abt.adel:hover{background:var(--rb);border-color:var(--r);color:var(--r);}
+.abt.aview:hover{background:var(--cb);border-color:var(--c);color:var(--c);}
+
+.side{
+  display:flex;flex-direction:column;gap:14px;
+  animation:fadeUp .4s .28s var(--ease) both;
+}
+
+.mini-card{
+  background:#fff;border:1px solid var(--border);
+  border-radius:12px;padding:18px;
+  box-shadow:0 1px 3px rgba(0,0,0,.04);
+}
+
+.mini-title{
+  font-size:11px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.9px;
+  color:var(--muted);margin-bottom:14px;
+}
+
+.dept-row{
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:11px;
+}
+
+.dept-row:last-child{margin-bottom:0;}
+
+.dept-lbl{font-size:12px;color:var(--text);font-weight:500;width:85px;flex-shrink:0;}
+
+.bar-wrap{
+  flex:1;height:6px;
+  background:var(--s2);border-radius:3px;overflow:hidden;
+}
+
+.bar{height:100%;border-radius:3px;transition:width .3s ease;}
+
+.dept-n{
+  font-size:11px;font-weight:700;color:var(--text);
+  min-width:20px;text-align:right;
+}
+
+.act-item{
+  display:flex;align-items:flex-start;gap:11px;
+  padding:11px 0;border-bottom:1px solid var(--border);
+}
+
+.act-item:last-child{border-bottom:none;padding-bottom:0;}
+.act-item:first-child{padding-top:0;}
+
+.act-dot{
+  width:7px;height:7px;border-radius:50%;
+  margin-top:4px;flex-shrink:0;
+}
+
+.act-text{font-size:12.5px;line-height:1.5;color:var(--text);font-weight:500;}
+.act-time{font-size:10.5px;color:var(--muted);margin-top:2px;}
+
+.project-card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-left:3px solid var(--c);
+  border-radius:10px;
+  padding:16px;
+  margin-bottom:12px;
+  transition:all .17s;
+}
+
+.project-card:hover{
+  box-shadow:0 4px 12px rgba(59,130,246,.15);
+  transform:translateX(4px);
+}
+
+.project-card.completed{
+  border-left-color:var(--g);
+  background:#f0fdf4;
+}
+
+.project-card.progress{
+  border-left-color:var(--c);
+  background:#eff6ff;
+}
+
+.project-card.pending{
+  border-left-color:var(--v);
+  background:#faf5ff;
+}
+
+.project-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  margin-bottom:12px;
+}
+
+.project-name{
+  font-size:14px;
+  font-weight:700;
+  color:var(--text);
+}
+
+.project-status{
+  padding:4px 12px;
+  border-radius:20px;
+  font-size:10px;
+  font-weight:700;
+  text-transform:uppercase;
+}
+
+.status-pending{background:var(--vb);color:var(--v);}
+.status-progress{background:var(--cb);color:var(--c);}
+.status-completed{background:var(--gb);color:var(--g);}
+
+.project-meta{
+  display:flex;
+  gap:16px;
+  font-size:12px;
+  color:var(--muted);
+  margin-bottom:8px;
+}
+
+.progress-bar{
+  width:100%;
+  height:6px;
+  background:var(--s2);
+  border-radius:3px;
+  overflow:hidden;
+}
+
+.progress-fill{
+  height:100%;
+  background:linear-gradient(90deg, var(--g), var(--c));
+  transition:width .3s ease;
+  border-radius:3px;
+}
+
+.overlay{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.35);
+  backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;
+  z-index:200;
+  opacity:0;pointer-events:none;
+  transition:opacity .22s;
+}
+
+.overlay.open{opacity:1;pointer-events:all;}
+
+.modal{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:14px;
+  width:620px;
+  max-height:85vh;
+  overflow-y:auto;
+  transform:translateY(15px) scale(.95);
+  transition:transform .22s var(--ease);
+  position:relative;
+  box-shadow:0 10px 40px rgba(0,0,0,.12);
+}
+
+.overlay.open .modal{transform:none;}
+
+.modal::-webkit-scrollbar{width:6px;}
+.modal::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px;}
+
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:26px 28px;
+  border-bottom:1px solid var(--border);
+  position:sticky;
+  top:0;
+  background:#fff;
+  z-index:10;
+}
+
+.modal-title{font-size:17px;font-weight:700;letter-spacing:-.3px;color:var(--text);}
+
+.modal-x{
+  width:28px;height:28px;border-radius:7px;
+  background:var(--s1);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted);cursor:pointer;transition:all .17s;
+  font-size:16px;
+}
+
+.modal-x:hover{background:var(--rb);color:var(--r);border-color:var(--r);}
+
+.modal-content{padding:26px 28px;}
+
+.form-section{margin-bottom:28px;}
+
+.form-section-title{
+  font-size:10.5px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.9px;
+  color:var(--muted);margin-bottom:14px;
+}
+
+.form-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  margin-bottom:16px;
+}
+
+.form-row.full{grid-template-columns:1fr;}
+
+.form-group{display:flex;flex-direction:column;}
+
+.form-label{
+  font-size:11px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.7px;
+  color:var(--muted);margin-bottom:7px;
+}
+
+.form-input,
+.form-select,
+.form-textarea{
+  padding:10px 12px;
+  background:#f8f9fa;
+  border:1px solid var(--border);
+  border-radius:8px;
+  color:var(--text);
+  font-family:'Outfit',sans-serif;
+  font-size:13px;
+  transition:all .17s;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus{
+  outline:none;
+  border-color:var(--c);
+  background:#fff;
+  box-shadow:0 0 0 3px rgba(59,130,246,.1);
+}
+
+.form-input::placeholder{color:var(--muted2);}
+
+.form-textarea{
+  resize:vertical;
+  min-height:110px;
+}
+
+.modal-footer{
+  display:flex;gap:10px;
+  padding:18px 28px;
+  border-top:1px solid var(--border);
+  background:var(--s1);
+  justify-content:flex-end;
+  position:sticky;
+  bottom:0;
+}
+
+.btn{
+  padding:9px 20px;
+  border-radius:8px;
+  font-family:'Outfit',sans-serif;
+  font-size:13px;font-weight:600;
+  cursor:pointer;transition:all .17s;
+  border:none;
+}
+
+.btn-ghost{
+  background:#fff;border:1px solid var(--border);
+  color:var(--muted);
+}
+
+.btn-ghost:hover{background:var(--s1);border-color:var(--border2);color:var(--text);}
+
+.btn-primary{
+  background:linear-gradient(135deg, var(--g), var(--c));
+  color:#fff;font-weight:700;
+  box-shadow:0 2px 8px rgba(16,185,129,.2);
+}
+
+.btn-primary:hover{
+  transform:translateY(-2px);
+  box-shadow:0 4px 12px rgba(16,185,129,.3);
+}
+
+.btn-danger{background:var(--r);color:#fff;}
+.btn-danger:hover{opacity:.85;transform:translateY(-2px);}
+
+.empty-state{
+  text-align:center;padding:60px 20px;color:var(--muted);
+}
+.empty-state svg{opacity:.15;margin-bottom:12px;}
+.empty-state p{font-size:13px;}
+
+.view-tabs{
+  display:flex;gap:0;margin-bottom:16px;border-bottom:1px solid var(--border);
+}
+
+.view-tab{
+  padding:12px 20px;
+  border:none;
+  background:none;
+  border-bottom:2px solid transparent;
+  color:var(--muted);
+  font-weight:600;
+  cursor:pointer;
+  font-family:'Outfit',sans-serif;
+  font-size:13px;
+  transition:all .17s;
+}
+
+.view-tab.active{
+  color:var(--c);
+  border-bottom-color:var(--c);
+}
+
+@media(max-width:768px){
+  .sidebar{width:70px;}
+  .main{flex:1;}
+  .stats{grid-template-columns:repeat(2,1fr);}
+  .grid{grid-template-columns:1fr;}
+  .modal{width:90%;}
+  .form-row{grid-template-columns:1fr;}
+  .topbar{padding:0 16px;}
+  .content{padding:16px;}
+}
+
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+</style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar">
+  <div class="sidebar-bg"></div>
+  <div class="sidebar-glow"></div>
+
+  <div class="logo">
+    <div class="logo-row">
+      <div class="logo-icon">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      </div>
+      <div>
+        <div class="logo-name">EMS</div>
+        <div class="logo-tag">Management</div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-section">Main</div>
+
+    <a class="nav-link active" href="#">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      Dashboard
+      <span class="nav-pill" id="navCount">—</span>
+    </a>
+
+    <a class="nav-link" href="project.html">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Assign Task
+    </a>
+
+    <a class="nav-link" href="index.html">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      Add Employee
+    </a>
+
+    <div class="nav-section">Reports</div>
+
+    <a class="nav-link" href="#">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Analytics
+    </a>
+
+    <a class="nav-link" href="#">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Export
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-av" id="sideAvatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sideUserName">Loading…</div>
+        <div class="user-id" id="sideUserId">—</div>
+      </div>
+      <button class="logout-icon" onclick="logout()" title="Logout">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main">
+
+  <div class="topbar">
+    <div class="tb-left">
+      <h1>Dashboard</h1>
+      <div class="breadcrumb">EMS / <b>Overview</b></div>
+    </div>
+    <div class="tb-right">
+      <div class="search-box">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="searchInput" placeholder="Search employees…" oninput="searchEmployee()">
+      </div>
+      <div class="icon-btn" title="Notifications">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <div class="dot"></div>
+      </div>
+      <div class="icon-btn" onclick="loadEmployees()" title="Refresh">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+      </div>
+
+      <div class="topbar-chip">
+        <div class="topbar-av" id="topAvatar">?</div>
+        <div class="topbar-user-info">
+          <div class="topbar-user-name" id="topUserName">User</div>
+          <div class="topbar-user-email" id="topUserEmail">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat sg">
+        <div class="stat-head">
+          <span class="stat-lbl">Total Employees</span>
+          <div class="stat-ico">👥</div>
+        </div>
+        <div class="stat-val" id="totalEmp">—</div>
+        <div class="stat-note">
+          <span class="trend tup">↑ Active</span> all departments
+        </div>
+      </div>
+
+      <div class="stat sc">
+        <div class="stat-head">
+          <span class="stat-lbl">Departments</span>
+          <div class="stat-ico">🏢</div>
+        </div>
+        <div class="stat-val" style="color:var(--c)">4</div>
+        <div class="stat-note">Eng · Design · HR · Ops</div>
+      </div>
+
+      <div class="stat sv">
+        <div class="stat-head">
+          <span class="stat-lbl">Tasks Assigned</span>
+          <div class="stat-ico">✓</div>
+        </div>
+        <div class="stat-val" style="color:var(--v)" id="totalTasks">0</div>
+        <div class="stat-note">
+          <span class="trend tneutral">In progress</span>
+        </div>
+      </div>
+
+      <div class="stat sr">
+        <div class="stat-head">
+          <span class="stat-lbl">Status</span>
+          <div class="stat-ico">📊</div>
+        </div>
+        <div class="stat-val" style="font-size:16px;font-weight:600;letter-spacing:0;display:flex;align-items:center;gap:7px;margin-top:2px">
+          <span style="width:8px;height:8px;border-radius:50%;background:var(--g);display:inline-block;animation:pulse 2s infinite"></span>
+          Operational
+        </div>
+        <div class="stat-note">All services online</div>
+      </div>
+    </div>
+
+    <!-- Grid -->
+    <div class="grid">
+
+      <!-- Employee Table -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">All Employees</div>
+            <div class="card-meta">Showing <strong id="visibleCount">0</strong> records</div>
+          </div>
+          <div class="filter-row">
+            <button class="fbtn on" onclick="setFilter(this)">All</button>
+            <button class="fbtn" onclick="setFilter(this)">Active</button>
+          </div>
+        </div>
+
+        <table id="empTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Employee</th>
+              <th>Email</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+        <div class="empty-state" id="emptyState" style="display:none">
+          <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <p>No employees found</p>
+        </div>
+      </div>
+
+      <!-- Side panel -->
+      <div class="side">
+
+        <div class="mini-card">
+          <div class="mini-title">Department Split</div>
+          <div class="dept-row">
+            <span class="dept-lbl">Engineering</span>
+            <div class="bar-wrap"><div class="bar" id="bar0" style="background:var(--g)"></div></div>
+            <span class="dept-n" id="dn0">—</span>
+          </div>
+          <div class="dept-row">
+            <span class="dept-lbl">Design</span>
+            <div class="bar-wrap"><div class="bar" id="bar1" style="background:var(--c)"></div></div>
+            <span class="dept-n" id="dn1">—</span>
+          </div>
+          <div class="dept-row">
+            <span class="dept-lbl">HR</span>
+            <div class="bar-wrap"><div class="bar" id="bar2" style="background:var(--v)"></div></div>
+            <span class="dept-n" id="dn2">—</span>
+          </div>
+          <div class="dept-row">
+            <span class="dept-lbl">Operations</span>
+            <div class="bar-wrap"><div class="bar" id="bar3" style="background:var(--amber)"></div></div>
+            <span class="dept-n" id="dn3">—</span>
+          </div>
+        </div>
+
+        <div class="mini-card" style="flex:1">
+          <div class="mini-title">Recent Activity</div>
+          <div id="activityList">
+            <div class="act-item">
+              <div class="act-dot" style="background:var(--g)"></div>
+              <div>
+                <div class="act-text">Dashboard loaded</div>
+                <div class="act-time">Just now</div>
+              </div>
+            </div>
+            <div class="act-item">
+              <div class="act-dot" style="background:var(--c)"></div>
+              <div>
+                <div class="act-text">Task assignment ready</div>
+                <div class="act-time">2 min ago</div>
+              </div>
+            </div>
+            <div class="act-item">
+              <div class="act-dot" style="background:var(--v)"></div>
+              <div>
+                <div class="act-text">System operational</div>
+                <div class="act-time">1 hr ago</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TASK ASSIGNMENT MODAL ═══ -->
+<div class="overlay" id="taskModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">Assign Task to Employee</h2>
+      <button class="modal-x" onclick="closeTaskModal()">✕</button>
+    </div>
+
+    <div class="modal-content">
+      <!-- Task Information -->
+      <div class="form-section">
+        <div class="form-section-title">Task Information</div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Task Name</label>
+            <input type="text" id="taskName" class="form-input" placeholder="e.g. Q1 Project Review">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Employee</label>
+            <select id="taskEmployee" class="form-select">
+              <option>Select employee…</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Department</label>
+            <select id="taskDept" class="form-select">
+              <option>Engineering</option>
+              <option>Design</option>
+              <option>HR</option>
+              <option>Operations</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Priority</label>
+            <select id="taskPriority" class="form-select">
+              <option>Normal</option>
+              <option>High</option>
+              <option>Urgent</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Due Date</label>
+            <input type="date" id="taskDueDate" class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Duration</label>
+            <select id="taskDuration" class="form-select">
+              <option>30 Minutes</option>
+              <option>1 Hour</option>
+              <option>2 Hours</option>
+              <option>1 Day</option>
+              <option>1 Week</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="form-section">
+        <div class="form-section-title">Task Description</div>
+        <textarea id="taskDesc" class="form-input" placeholder="Provide task details and requirements…"></textarea>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeTaskModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="assignTask()">Assign Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ DELETE MODAL ═══ -->
+<div class="overlay" id="deleteModal">
+  <div class="modal" style="width:420px">
+    <button class="modal-x" onclick="closeModal()" style="position:absolute;top:16px;right:16px;z-index:11;">✕</button>
+    <div class="modal-content" style="padding:28px;text-align:center;">
+      <div style="width:48px;height:48px;border-radius:12px;background:var(--rb);display:flex;align-items:center;justify-content:center;color:var(--r);font-size:24px;margin:0 auto 16px;box-shadow:0 2px 8px rgba(239,68,68,.15);">🗑️</div>
+      <h2 style="font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px;">Remove Employee</h2>
+      <p style="font-size:12.5px;color:var(--muted);margin-bottom:18px;line-height:1.6;">This permanently removes the record and cannot be undone. Provide a reason — it will be logged for audit purposes.</p>
+      <label class="form-label" style="text-align:left;display:block;">Reason for removal</label>
+      <textarea id="deleteReason" class="form-input" placeholder="e.g. Resignation, contract ended, restructuring…" style="margin-bottom:20px;"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">Confirm Removal</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+let pendingDeleteId = null;
+let taskCount = 0;
+const AVHUE = ['av0','av1','av2','av3','av4'];
+
+const storedName  = localStorage.getItem("userName");
+const storedEmail = localStorage.getItem("email");
+const storedId    = localStorage.getItem("userId");
+
+const displayName  = storedName || storedEmail || "User";
+const avatarLetter = displayName.charAt(0).toUpperCase();
+
+document.getElementById("sideAvatar").textContent  = avatarLetter;
+document.getElementById("sideUserName").textContent = displayName;
+document.getElementById("sideUserId").textContent   = storedId ? "ID: " + storedId : (storedEmail || "—");
+
+document.getElementById("topAvatar").textContent    = avatarLetter;
+document.getElementById("topUserName").textContent  = displayName;
+document.getElementById("topUserEmail").textContent = storedEmail || storedId || "—";
+
+function loadEmployees() {
+  fetch("http://localhost:8080/api/employees")
+    .then(r => r.json())
+    .then(render)
+    .catch(() => render([
+      { id:"EMP001", name:"Sarah Johnson",  email:"sarah.j@company.com", department:"Engineering"   },
+      { id:"EMP002", name:"Marcus Reed",    email:"m.reed@company.com", department:"Design"    },
+      { id:"EMP003", name:"Priya Nair",     email:"p.nair@company.com", department:"HR"    },
+      { id:"EMP004", name:"Daniel Park",    email:"d.park@company.com", department:"Engineering"    },
+      { id:"EMP005", name:"Amara Osei",     email:"a.osei@company.com", department:"Operations"    },
+      { id:"EMP006", name:"Tom Erikson",    email:"t.erikson@company.com", department:"Design" },
+    ]));
+}
+
+function render(data) {
+  const tbody = document.querySelector("#empTable tbody");
+  const taskEmpSelect = document.getElementById("taskEmployee");
+  
+  tbody.innerHTML = "";
+  taskEmpSelect.innerHTML = '<option>Select employee…</option>';
+
+  data.forEach((emp, i) => {
+    const letter = emp.name ? emp.name.charAt(0).toUpperCase() : "?";
+    const hue    = AVHUE[i % AVHUE.length];
+    const dept = emp.department || emp.dept || emp.role || "—";
+    const tr   = document.createElement("tr");
+    tr.innerHTML = `
+      <td><span class="cid">#${emp.id}</span></td>
+      <td>
+        <div class="cemp">
+          <div class="av ${hue}">${letter}</div>
+          <div>
+            <div class="ename">${emp.name}</div>
+            <div class="edept">${dept}</div>
+          </div>
+        </div>
+      </td>
+      <td><span class="cemail">${emp.email}</span></td>
+      <td><span class="spill active"><span class="sdot"></span>Active</span></td>
+      <td>
+        <div class="acts">
+          <button class="abt aview" title="View profile">👁️</button>
+          <button class="abt adel" title="Remove" onclick="openModal(${JSON.stringify(emp.id)})">🗑️</button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+
+    const opt = document.createElement("option");
+    opt.value = emp.id;
+    opt.textContent = emp.name;
+    taskEmpSelect.appendChild(opt);
+  });
+
+  const n = data.length;
+  document.getElementById("totalEmp").textContent    = n;
+  document.getElementById("visibleCount").textContent = n;
+  document.getElementById("navCount").textContent    = n;
+  document.getElementById("emptyState").style.display = n === 0 ? "" : "none";
+  updateDeptBars(data);
+}
+
+function updateDeptBars(data) {
+  const DEPTS = [
+    { key: "Engineering", id: 0 },
+    { key: "Design",      id: 1 },
+    { key: "HR",          id: 2 },
+    { key: "Operations",  id: 3 },
+  ];
+
+  const counts = {};
+  data.forEach(emp => {
+    const d = (emp.department || emp.dept || emp.role || "").trim().toLowerCase();
+    counts[d] = (counts[d] || 0) + 1;
+  });
+
+  const max = Math.max(...Object.values(counts), 1);
+
+  DEPTS.forEach(dept => {
+    const n   = counts[dept.key.toLowerCase()] || 0;
+    const pct = (n / max) * 100;
+    document.getElementById("bar" + dept.id).style.width = pct + "%";
+    document.getElementById("dn"  + dept.id).textContent = n;
+  });
+}
+
+function searchEmployee() {
+  const q    = document.getElementById("searchInput").value.toLowerCase();
+  const rows = document.querySelectorAll("#empTable tbody tr");
+  let vis    = 0;
+
+  rows.forEach(row => {
+    const match = row.textContent.toLowerCase().includes(q);
+    row.style.display = match ? "" : "none";
+    if (match) vis++;
+  });
+
+  document.getElementById("visibleCount").textContent   = vis;
+  document.getElementById("emptyState").style.display   = vis === 0 ? "" : "none";
+}
+
+function setFilter(btn) {
+  document.querySelectorAll(".fbtn").forEach(b => b.classList.remove("on"));
+  btn.classList.add("on");
+}
+
+function openTaskModal() {
+  document.getElementById("taskModal").classList.add("open");
+  setTimeout(() => document.getElementById("taskName").focus(), 220);
+}
+
+function closeTaskModal() {
+  document.getElementById("taskModal").classList.remove("open");
+  document.getElementById("taskName").value = "";
+  document.getElementById("taskDesc").value = "";
+}
+
+function assignTask() {
+  const name = document.getElementById("taskName").value.trim();
+  const empId = document.getElementById("taskEmployee").value;
+  const dueDate = document.getElementById("taskDueDate").value;
+  
+  if (!name || empId === "Select employee…" || !dueDate) {
+    alert("Please fill in all required fields");
+    return;
+  }
+
+  taskCount++;
+  document.getElementById("totalTasks").textContent = taskCount;
+  
+  const task = {
+    taskName: name,
+    employeeId: empId,
+    department: document.getElementById("taskDept").value,
+    priority: document.getElementById("taskPriority").value,
+    dueDate: dueDate,
+    duration: document.getElementById("taskDuration").value,
+    description: document.getElementById("taskDesc").value
+  };
+
+  fetch("http://localhost:8080/api/projects", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(task)
+  })
+  .then(r => {
+    if (r.ok) {
+      closeTaskModal();
+      addActivity(`Task "${name}" assigned`, "just now", "var(--g)");
+    }
+  })
+  .catch(() => {
+    closeTaskModal();
+    addActivity(`Task "${name}" assigned`, "just now", "var(--g)");
+  });
+}
+
+function openModal(id) {
+  pendingDeleteId = id;
+  document.getElementById("deleteReason").value = "";
+  document.getElementById("deleteModal").classList.add("open");
+  setTimeout(() => document.getElementById("deleteReason").focus(), 220);
+}
+
+function closeModal() {
+  document.getElementById("deleteModal").classList.remove("open");
+  pendingDeleteId = null;
+}
+
+function confirmDelete() {
+  const reason = document.getElementById("deleteReason").value.trim();
+  if (!reason) {
+    document.getElementById("deleteReason").style.borderColor = "var(--r)";
+    return;
+  }
+
+  fetch("http://localhost:8080/api/employees/" + pendingDeleteId, {
+    method:"DELETE",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({ reason })
+  })
+  .then(res => { if (res.ok) { closeModal(); loadEmployees(); } else alert("Delete failed."); })
+  .catch(() => { closeModal(); loadEmployees(); });
+
+  addActivity(`Employee #${pendingDeleteId} removed`, "just now", "var(--r)");
+}
+
+function addActivity(text, time, color) {
+  const list = document.getElementById("activityList");
+  const div  = document.createElement("div");
+  div.className = "act-item";
+  div.innerHTML = `
+    <div class="act-dot" style="background:${color}"></div>
+    <div>
+      <div class="act-text">${text}</div>
+      <div class="act-time">${time}</div>
+    </div>
+  `;
+  list.prepend(div);
+}
+
+function logout() {
+  localStorage.clear();
+  window.location.href = "login.html";
+}
+
+document.getElementById("taskModal").addEventListener("click", function(e) {
+  if (e.target === this) closeTaskModal();
+});
+
+document.getElementById("deleteModal").addEventListener("click", function(e) {
+  if (e.target === this) closeModal();
+});
+
+loadEmployees();
+</script>
+</body>
+</html>

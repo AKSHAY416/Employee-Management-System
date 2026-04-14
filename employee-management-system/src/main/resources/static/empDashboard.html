@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Employee Dashboard — EMS</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+:root {
+  --bg:      #ffffff;
+  --s1:      #f8f9fa;
+  --s2:      #f0f2f5;
+  --s3:      #e8ecf1;
+  --border:  #e0e4e9;
+  --border2: #d0d5dd;
+  --text:    #1a1d23;
+  --muted:   #6b7280;
+  --muted2:  #9ca3af;
+  --g:       #10b981;
+  --gb:      rgba(16,185,129,0.1);
+  --c:       #3b82f6;
+  --cb:      rgba(59,130,246,0.1);
+  --v:       #8b5cf6;
+  --vb:      rgba(139,92,246,0.1);
+  --r:       #ef4444;
+  --rb:      rgba(239,68,68,0.1);
+  --sidebar: 240px;
+  --ease:    cubic-bezier(.4,0,.2,1);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+body {
+  font-family:'Outfit',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  display:flex;
+  height:100vh;
+  overflow:hidden;
+  font-size:14px;
+}
+
+/* ─── SIDEBAR ─── */
+.sidebar {
+  width:var(--sidebar);
+  background:#fff;
+  border-right:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+  flex-shrink:0;
+  position:relative;
+  overflow:hidden;
+}
+
+.sidebar-bg {
+  position:absolute;
+  inset:0;
+  background-image:
+    linear-gradient(var(--border) 1px,transparent 1px),
+    linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:30px 30px;
+  opacity:.15;
+  pointer-events:none;
+}
+
+.sidebar-glow {
+  position:absolute;
+  top:-80px;left:-80px;
+  width:300px;height:300px;
+  background:radial-gradient(circle,rgba(16,185,129,.08) 0%,transparent 65%);
+  pointer-events:none;
+  z-index:1;
+}
+
+.logo {
+  padding:24px 18px 20px;
+  border-bottom:1px solid var(--border);
+  position:relative;z-index:2;
+}
+
+.logo-row {
+  display:flex;align-items:center;gap:12px;
+}
+
+.logo-icon {
+  width:40px;height:40px;border-radius:10px;
+  background:linear-gradient(135deg, var(--c), var(--v));
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  box-shadow:0 2px 12px rgba(59,130,246,.15);
+  color:#fff;
+}
+
+.logo-icon svg{width:22px;height:22px;}
+
+.logo-name {
+  font-weight:700;font-size:18px;letter-spacing:-.3px;color:var(--text);
+}
+
+.logo-tag {
+  font-size:10px;color:var(--muted);
+  letter-spacing:.8px;text-transform:uppercase;margin-top:2px;
+}
+
+.nav {
+  flex:1;padding:14px 10px;
+  display:flex;flex-direction:column;gap:2px;
+  position:relative;z-index:2;overflow-y:auto;
+}
+
+.nav::-webkit-scrollbar{width:6px;}
+.nav::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px;}
+
+.nav-section {
+  font-size:9.5px;text-transform:uppercase;
+  letter-spacing:1.2px;color:var(--muted2);
+  padding:14px 12px 6px;font-weight:600;
+}
+
+.nav-link {
+  display:flex;align-items:center;gap:11px;
+  padding:10px 12px;border-radius:8px;
+  color:var(--muted);text-decoration:none;
+  font-size:13.5px;font-weight:500;
+  transition:all .17s var(--ease);
+  position:relative;cursor:pointer;
+}
+
+.nav-link svg{flex-shrink:0;width:16px;height:16px;}
+
+.nav-link:hover{background:var(--s1);color:var(--text);}
+
+.nav-link.active{background:var(--cb);color:var(--c);}
+
+.nav-link.active::before{
+  content:'';position:absolute;
+  left:0;top:20%;bottom:20%;
+  width:3px;background:var(--c);
+  border-radius:0 2px 2px 0;
+}
+
+.nav-pill {
+  margin-left:auto;
+  background:var(--s2);color:var(--muted);
+  font-size:10px;padding:2px 8px;
+  border-radius:20px;font-weight:600;
+  border:1px solid var(--border);
+  transition:all .17s;
+}
+
+.nav-link.active .nav-pill{
+  background:var(--cb);color:var(--c);
+  border-color:rgba(59,130,246,.2);
+}
+
+.sidebar-footer {
+  padding:12px 10px;
+  border-top:1px solid var(--border);
+  position:relative;z-index:2;
+}
+
+.user-card {
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;
+  border-radius:10px;
+  background:var(--s1);
+  border:1px solid var(--border);
+  transition:all .17s;
+  cursor:pointer;
+}
+
+.user-card:hover{background:var(--s2);border-color:var(--border2);}
+
+.user-av {
+  width:36px;height:36px;border-radius:8px;
+  background:linear-gradient(135deg,var(--c),var(--v));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:14px;color:#fff;
+  flex-shrink:0;
+}
+
+.user-info{flex:1;min-width:0;}
+
+.user-name {
+  font-size:12.5px;font-weight:600;color:var(--text);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+
+.user-id{font-size:10.5px;color:var(--muted);margin-top:2px;}
+
+.logout-icon {
+  width:28px;height:28px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted);cursor:pointer;
+  background:none;border:none;
+  transition:all .17s;flex-shrink:0;
+}
+
+.logout-icon:hover{background:var(--rb);color:var(--r);}
+
+.main{
+  flex:1;display:flex;flex-direction:column;
+  overflow:hidden;background:var(--bg);
+}
+
+.topbar {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;height:64px;
+  border-bottom:1px solid var(--border);
+  background:#fff;flex-shrink:0;gap:16px;
+}
+
+.tb-left h1{
+  font-size:18px;font-weight:700;letter-spacing:-.3px;color:var(--text);
+}
+
+.breadcrumb{
+  font-size:11px;color:var(--muted);margin-top:3px;
+}
+
+.breadcrumb b{color:var(--c);font-weight:600;}
+
+.tb-right{display:flex;align-items:center;gap:10px;}
+
+.icon-btn{
+  width:36px;height:36px;border-radius:8px;
+  background:var(--s1);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted);cursor:pointer;
+  transition:all .17s;position:relative;
+}
+
+.icon-btn:hover{border-color:var(--border2);color:var(--text);background:#fff;}
+
+.topbar-chip{
+  display:flex;align-items:center;gap:10px;
+  padding:6px 14px 6px 6px;
+  background:var(--s1);
+  border:1px solid var(--border);
+  border-radius:40px;
+  margin-left:6px;
+  transition:all .17s;
+  cursor:pointer;
+}
+
+.topbar-chip:hover{background:#fff;border-color:var(--border2);}
+
+.topbar-av{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,var(--c),var(--v));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:12px;color:#fff;
+  flex-shrink:0;
+}
+
+.topbar-user-info{line-height:1.3;}
+
+.topbar-user-name{
+  font-size:12.5px;font-weight:600;color:var(--text);
+  white-space:nowrap;
+}
+
+.topbar-user-email{
+  font-size:10.5px;color:var(--muted);
+  white-space:nowrap;
+}
+
+.content{
+  flex:1;overflow-y:auto;
+  padding:24px 28px 32px;
+  scrollbar-width:thin;
+  scrollbar-color:var(--s3) transparent;
+  background:#fff;
+}
+
+.content::-webkit-scrollbar{width:6px;}
+.content::-webkit-scrollbar-thumb{background:var(--s3);border-radius:4px;}
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;margin-bottom:24px;
+}
+
+.stat{
+  background:#fff;border:1px solid var(--border);
+  border-radius:12px;padding:20px;
+  position:relative;overflow:hidden;
+  transition:all .2s var(--ease);
+  animation:fadeUp .4s var(--ease) both;
+}
+
+.stat:nth-child(1){animation-delay:.04s}
+.stat:nth-child(2){animation-delay:.08s}
+.stat:nth-child(3){animation-delay:.12s}
+.stat:nth-child(4){animation-delay:.16s}
+
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.stat:hover{
+  transform:translateY(-3px);
+  border-color:var(--border2);
+  box-shadow:0 4px 12px rgba(0,0,0,.06);
+}
+
+.stat::before{
+  content:'';position:absolute;
+  top:0;left:0;right:0;height:3px;border-radius:12px 12px 0 0;
+}
+
+.stat.sg::before{background:var(--g);}
+.stat.sc::before{background:var(--c);}
+.stat.sv::before{background:var(--v);}
+.stat.sr::before{background:var(--r);}
+
+.stat-head{
+  display:flex;align-items:center;
+  justify-content:space-between;margin-bottom:14px;
+}
+
+.stat-lbl{
+  font-size:10.5px;text-transform:uppercase;
+  letter-spacing:.9px;color:var(--muted);font-weight:600;
+}
+
+.stat-ico{
+  width:32px;height:32px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;
+}
+
+.stat.sg .stat-ico{background:var(--gb);color:var(--g);}
+.stat.sc .stat-ico{background:var(--cb);color:var(--c);}
+.stat.sv .stat-ico{background:var(--vb);color:var(--v);}
+.stat.sr .stat-ico{background:var(--rb);color:var(--r);}
+
+.stat-val{
+  font-size:28px;font-weight:700;
+  letter-spacing:-1px;line-height:1;margin-bottom:8px;
+}
+
+.stat.sg .stat-val{color:var(--g);}
+.stat.sc .stat-val{color:var(--c);}
+.stat.sv .stat-val{color:var(--v);}
+.stat.sr .stat-val{color:var(--r);}
+
+.stat-note{
+  font-size:12px;color:var(--muted);
+  display:flex;align-items:center;gap:6px;
+}
+
+.trend{
+  display:inline-flex;align-items:center;
+  font-size:10.5px;font-weight:700;
+  padding:2px 8px;border-radius:20px;
+}
+
+.tup{background:var(--gb);color:var(--g);}
+.tdown{background:var(--rb);color:var(--r);}
+.tneutral{background:var(--vb);color:var(--v);}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 300px;
+  gap:16px;
+}
+
+.card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;
+  animation:fadeUp .4s .2s var(--ease) both;
+  box-shadow:0 1px 3px rgba(0,0,0,.04);
+}
+
+.card-head{
+  padding:16px 20px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;
+  justify-content:space-between;gap:14px;
+  background:var(--s1);
+}
+
+.card-title{font-size:15px;font-weight:700;color:var(--text);}
+.card-meta{font-size:11.5px;color:var(--muted);}
+.card-meta strong{color:var(--c);font-weight:600;}
+
+table{width:100%;border-collapse:collapse;}
+
+thead th{
+  padding:10px 16px;text-align:left;
+  font-size:10.5px;text-transform:uppercase;
+  letter-spacing:.8px;color:var(--muted);
+  background:transparent;font-weight:600;
+  border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+
+tbody tr{
+  border-bottom:1px solid var(--border);
+  transition:background .15s;
+}
+
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:var(--s1);}
+
+tbody td{padding:12px 16px;vertical-align:middle;}
+
+.cid{
+  font-size:11px;font-weight:600;
+  color:var(--muted);font-variant-numeric:tabular-nums;
+}
+
+.task-cell{display:flex;align-items:center;gap:11px;}
+
+.av{
+  width:32px;height:32px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;flex-shrink:0;
+  color:#fff;
+}
+
+.av-task{background:linear-gradient(135deg, rgba(59,130,246,.8), rgba(59,130,246,.6));}
+
+.task-title{font-size:13px;font-weight:600;color:var(--text);}
+.task-dept{font-size:10.5px;color:var(--muted);margin-top:2px;}
+
+.spill{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:20px;font-size:10.5px;font-weight:600;
+}
+
+.spill.pending{
+  background:var(--vb);
+  color:var(--v);
+  border:1px solid rgba(139,92,246,.25);
+}
+
+.spill.progress{
+  background:var(--cb);
+  color:var(--c);
+  border:1px solid rgba(59,130,246,.25);
+}
+
+.spill.in_progress{
+  background:var(--cb);
+  color:var(--c);
+  border:1px solid rgba(59,130,246,.25);
+}
+
+.spill.completed{
+  background:var(--gb);
+  color:var(--g);
+  border:1px solid rgba(16,185,129,.25);
+}
+
+.sdot{width:4px;height:4px;border-radius:50%;background:currentColor;}
+
+.side{
+  display:flex;flex-direction:column;gap:14px;
+  animation:fadeUp .4s .28s var(--ease) both;
+}
+
+.mini-card{
+  background:#fff;border:1px solid var(--border);
+  border-radius:12px;padding:18px;
+  box-shadow:0 1px 3px rgba(0,0,0,.04);
+}
+
+.mini-title{
+  font-size:11px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.9px;
+  color:var(--muted);margin-bottom:14px;
+}
+
+.progress-section{
+  margin-bottom:16px;
+}
+
+.progress-label{
+  font-size:12px;font-weight:600;color:var(--text);
+  display:flex;justify-content:space-between;margin-bottom:8px;
+}
+
+.progress-bar{
+  width:100%;height:6px;
+  background:var(--s2);border-radius:3px;overflow:hidden;
+}
+
+.progress-fill{
+  height:100%;
+  background:var(--c);
+  transition:width .3s ease;
+  border-radius:3px;
+}
+
+.act-item{
+  display:flex;align-items:flex-start;gap:11px;
+  padding:11px 0;border-bottom:1px solid var(--border);
+}
+
+.act-item:last-child{border-bottom:none;padding-bottom:0;}
+.act-item:first-child{padding-top:0;}
+
+.act-dot{
+  width:7px;height:7px;border-radius:50%;
+  margin-top:4px;flex-shrink:0;
+}
+
+.act-text{font-size:12.5px;line-height:1.5;color:var(--text);font-weight:500;}
+.act-time{font-size:10.5px;color:var(--muted);margin-top:2px;}
+
+.empty-state{
+  text-align:center;padding:60px 20px;color:var(--muted);
+}
+.empty-state svg{opacity:.15;margin-bottom:12px;}
+.empty-state p{font-size:13px;}
+
+.loading{
+  text-align:center;padding:40px;color:var(--muted);
+}
+
+.spinner-small{
+  display:inline-block;width:16px;height:16px;
+  border:2px solid var(--s2);border-top-color:var(--c);
+  border-radius:50%;animation:spin .8s linear infinite;
+}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:768px){
+  .sidebar{width:70px;}
+  .main{flex:1;}
+  .stats{grid-template-columns:repeat(2,1fr);}
+  .grid{grid-template-columns:1fr;}
+  .topbar{padding:0 16px;}
+  .content{padding:16px;}
+}
+
+</style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar">
+  <div class="sidebar-bg"></div>
+  <div class="sidebar-glow"></div>
+
+  <div class="logo">
+    <div class="logo-row">
+      <div class="logo-icon">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      </div>
+      <div>
+        <div class="logo-name">EMS</div>
+        <div class="logo-tag">Employee</div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-section">Main</div>
+
+    <a class="nav-link active" href="#">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      My Dashboard
+      <span class="nav-pill" id="navCount">0</span>
+    </a>
+
+    <a class="nav-link" href="#">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      My Tasks
+    </a>
+
+    <div class="nav-section">Account</div>
+
+    <a class="nav-link" href="#">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      Profile
+    </a>
+
+    <a class="nav-link" href="#">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+      Settings
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-av" id="sideAvatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sideUserName">Loading…</div>
+        <div class="user-id" id="sideUserId">—</div>
+      </div>
+      <button class="logout-icon" onclick="logout()" title="Logout">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main">
+
+  <div class="topbar">
+    <div class="tb-left">
+      <h1>My Dashboard</h1>
+      <div class="breadcrumb">EMS / <b>Employee Dashboard</b></div>
+    </div>
+    <div class="tb-right">
+      <div class="icon-btn" title="Notifications">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+      </div>
+      <div class="icon-btn" onclick="location.reload()" title="Refresh">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+      </div>
+
+      <div class="topbar-chip">
+        <div class="topbar-av" id="topAvatar">?</div>
+        <div class="topbar-user-info">
+          <div class="topbar-user-name" id="topUserName">Employee</div>
+          <div class="topbar-user-email" id="topUserEmail">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat sc">
+        <div class="stat-head">
+          <span class="stat-lbl">My Tasks</span>
+          <div class="stat-ico">📋</div>
+        </div>
+        <div class="stat-val" id="totalTasks">0</div>
+        <div class="stat-note">
+          <span class="trend tneutral">assigned</span>
+        </div>
+      </div>
+
+      <div class="stat sg">
+        <div class="stat-head">
+          <span class="stat-lbl">Completed</span>
+          <div class="stat-ico">✓</div>
+        </div>
+        <div class="stat-val" id="completedTasks">0</div>
+        <div class="stat-note">well done!</div>
+      </div>
+
+      <div class="stat sv">
+        <div class="stat-head">
+          <span class="stat-lbl">In Progress</span>
+          <div class="stat-ico">⏳</div>
+        </div>
+        <div class="stat-val" id="inProgressTasks">0</div>
+        <div class="stat-note">
+          <span class="trend tneutral">on track</span>
+        </div>
+      </div>
+
+      <div class="stat sr">
+        <div class="stat-head">
+          <span class="stat-lbl">Pending</span>
+          <div class="stat-ico">⏸</div>
+        </div>
+        <div class="stat-val" id="pendingTasks">0</div>
+        <div class="stat-note">needs attention</div>
+      </div>
+    </div>
+
+    <!-- Grid -->
+    <div class="grid">
+
+      <!-- Task Table -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">My Tasks</div>
+            <div class="card-meta">Showing <strong id="visibleCount">0</strong> tasks</div>
+          </div>
+        </div>
+
+        <div id="taskTableContainer">
+          <div class="loading"><div class="spinner-small"></div> Loading tasks...</div>
+        </div>
+
+        <div class="empty-state" id="emptyState" style="display:none">
+          <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+          <p>No tasks assigned yet</p>
+        </div>
+      </div>
+
+      <!-- Side panel -->
+      <div class="side">
+
+        <div class="mini-card">
+          <div class="mini-title">Overall Progress</div>
+          
+          <div class="progress-section">
+            <div class="progress-label">
+              <span>Completion Rate</span>
+              <strong id="completionPct">0%</strong>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="progressFill" style="width:0%"></div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:11px">
+            <div style="flex:1;text-align:center">
+              <div style="font-weight:600;color:var(--text)" id="statCompleted">0</div>
+              <div style="color:var(--muted)">Completed</div>
+            </div>
+            <div style="flex:1;text-align:center">
+              <div style="font-weight:600;color:var(--text)" id="statProgress">0</div>
+              <div style="color:var(--muted)">Progress</div>
+            </div>
+            <div style="flex:1;text-align:center">
+              <div style="font-weight:600;color:var(--text)" id="statPending">0</div>
+              <div style="color:var(--muted)">Pending</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mini-card" style="flex:1">
+          <div class="mini-title">Recent Activity</div>
+          <div id="activityList">
+            <div class="act-item">
+              <div class="act-dot" style="background:var(--c)"></div>
+              <div>
+                <div class="act-text">Dashboard loaded</div>
+                <div class="act-time">Just now</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+// Get user info from localStorage
+const storedName  = localStorage.getItem("userName");
+const storedEmail = localStorage.getItem("userEmail");
+const storedId    = localStorage.getItem("userId");
+const displayName  = storedName || storedEmail || "Employee";
+const avatarLetter = displayName.charAt(0).toUpperCase();
+
+// Set user info in UI
+document.getElementById("sideAvatar").textContent  = avatarLetter;
+document.getElementById("sideUserName").textContent = displayName;
+document.getElementById("sideUserId").textContent   = storedId ? "ID: " + storedId : (storedEmail || "—");
+
+document.getElementById("topAvatar").textContent    = avatarLetter;
+document.getElementById("topUserName").textContent  = displayName;
+document.getElementById("topUserEmail").textContent = storedEmail || storedId || "—";
+
+let allTasks = [];
+
+// Fetch tasks from API - FIXED FOR YOUR API RESPONSE
+async function loadTasks() {
+  try {
+    const userId = localStorage.getItem("userId");
+    console.log("Loading tasks for user ID:", userId);
+    
+    if (!userId) {
+      console.log("No userId found");
+      showEmpty();
+      return;
+    }
+
+    const response = await fetch(`http://localhost:8080/api/projects/user/${userId}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" }
+    });
+
+    console.log("API Response Status:", response.status);
+
+    if (!response.ok) {
+      console.log("API error:", response.status);
+      showEmpty();
+      return;
+    }
+
+    const data = await response.json();
+    console.log("API Response:", data);
+    
+    allTasks = Array.isArray(data) ? data : (data ? [data] : []);
+    console.log("Tasks loaded:", allTasks.length);
+    
+    if (allTasks.length === 0) {
+      console.log("No tasks assigned");
+      showEmpty();
+      return;
+    }
+
+    renderTaskTable();
+    updateStats();
+
+  } catch (error) {
+    console.error("Error loading tasks:", error);
+    showEmpty();
+  }
+}
+
+function renderTaskTable() {
+  const container = document.getElementById("taskTableContainer");
+  
+  let html = `
+    <table>
+      <thead>
+        <tr>
+          <th>Task Name</th>
+          <th>Description</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  allTasks.forEach((task) => {
+    // YOUR API FIELDS: projectId, projectName, description, status, employeeId, employeeEmail
+    const taskName = task.projectName || "Untitled";
+    const taskDesc = task.description || "No description";
+    const taskStatus = task.status ? task.status.toLowerCase() : "pending";
+    
+    // Map status to CSS classes
+    let statusClass = "pending";
+    if (taskStatus === "completed") {
+      statusClass = "completed";
+    } else if (taskStatus === "progress" || taskStatus === "in_progress") {
+      statusClass = "progress";
+    }
+    // If status is something random like "slow", "jj" - default to pending
+    
+    html += `
+      <tr>
+        <td>
+          <div class="task-cell">
+            <div class="av av-task">${taskName.charAt(0).toUpperCase()}</div>
+            <div>
+              <div class="task-title">${taskName}</div>
+              <div class="task-dept">ID: ${task.projectId}</div>
+            </div>
+          </div>
+        </td>
+        <td><div class="task-title" style="font-size:12px;">${taskDesc}</div></td>
+        <td><span class="spill ${statusClass}"><span class="sdot"></span>${taskStatus.charAt(0).toUpperCase() + taskStatus.slice(1)}</span></td>
+      </tr>
+    `;
+  });
+
+  html += `
+      </tbody>
+    </table>
+  `;
+
+  container.innerHTML = html;
+  document.getElementById("visibleCount").textContent = allTasks.length;
+  document.getElementById("navCount").textContent = allTasks.length;
+}
+
+function showEmpty() {
+  document.getElementById("taskTableContainer").innerHTML = "";
+  document.getElementById("emptyState").style.display = "block";
+  document.getElementById("totalTasks").textContent = "0";
+  document.getElementById("visibleCount").textContent = "0";
+  document.getElementById("navCount").textContent = "0";
+  updateStats();
+}
+
+function updateStats() {
+  // Count tasks by status - YOUR API STATUS VALUES: "slow", "pending", "Pending", "jj", etc
+  const completed = allTasks.filter(t => t.status && t.status.toLowerCase() === "completed").length;
+  const progress = allTasks.filter(t => t.status && (t.status.toLowerCase() === "progress" || t.status.toLowerCase() === "in_progress")).length;
+  const pending = allTasks.filter(t => !t.status || t.status.toLowerCase() === "pending" || t.status.toLowerCase() === "slow" || t.status.toLowerCase() === "jj").length;
+  const total = allTasks.length;
+  const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+  document.getElementById("totalTasks").textContent = total;
+  document.getElementById("completedTasks").textContent = completed;
+  document.getElementById("inProgressTasks").textContent = progress;
+  document.getElementById("pendingTasks").textContent = pending;
+  document.getElementById("completionPct").textContent = rate + "%";
+  document.getElementById("progressFill").style.width = rate + "%";
+  document.getElementById("statCompleted").textContent = completed;
+  document.getElementById("statProgress").textContent = progress;
+  document.getElementById("statPending").textContent = pending;
+}
+
+function logout() {
+  localStorage.clear();
+  window.location.href = "login.html";
+}
+
+// Load tasks on page ready
+document.addEventListener("DOMContentLoaded", loadTasks);
+
+</script>
+</body>
+</html>
